@@ -26,5 +26,8 @@ public abstract class Utilities {
     // Involves with scoreboard
     public static final int DEFAULT_SCORE = 0;
 
-
+    // Involves with Waiting Page
+    public static final String WORD_1 = "TOUCH (ANYWHERE)";
+    public static final String WORD_2 = "THE SCREEN";
+    public static final String WORD_3 = "TO START";
 }
