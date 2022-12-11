@@ -48,7 +48,10 @@ public class RunningDude extends ApplicationAdapter {
 
 	// Handles the score
 	int score = 0;
-	BitmapFont font;
+	BitmapFont scoreFont;
+
+	// Waiting Page
+	Texture waitingPage;
 
 	// Called when the app is opened for the first time
 	@Override
@@ -76,9 +79,12 @@ public class RunningDude extends ApplicationAdapter {
 		toxin = new GameAccessory("toxin.png");
 
 		// Set up the scoreboard
-		font = new BitmapFont();
-		font.setColor(Color.WHITE);
-		font.getData().setScale(8);
+		scoreFont = new BitmapFont();
+		scoreFont.setColor(Color.WHITE);
+		scoreFont.getData().setScale(8);
+
+		// Set up the waiting page
+		waitingPage = new Texture("start.png");
 	}
 
 	// Runs over and over again until the app is done
@@ -94,6 +100,7 @@ public class RunningDude extends ApplicationAdapter {
 
 		if (gameState == Utilities.GAME_WAITING_STATE) {
 			// Waiting to start
+			setUpWaitingPage();
 			executeGameStart();
 		}
 
@@ -114,7 +121,7 @@ public class RunningDude extends ApplicationAdapter {
 		detectGameOver();
 
 		// Shows the score on the screen
-		font.draw(batch, String.valueOf(score), gameWidth - 200, 150);
+		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
 
 		// Finish putting things on the screen
 		batch.end();
@@ -124,6 +131,12 @@ public class RunningDude extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		batch.dispose();
+	}
+
+	private void setUpWaitingPage() {
+		int xCoord = (gameWidth / 2) - (waitingPage.getWidth() / 2);
+		int yCoord = (gameHeight / 2) - (waitingPage.getHeight() / 2);
+		batch.draw(waitingPage, xCoord, yCoord);
 	}
 
 	private void executeGameStart() {
@@ -147,19 +160,19 @@ public class RunningDude extends ApplicationAdapter {
 		printToxinsToScreen();
 		printDiamondsToScreen();
 
-		// Handles jump
-		if (Gdx.input.justTouched()) {
-			jump();
-		}
-
-		updateCharacterState();
-
 		// Set game character based on his state of the game
 		Texture[] dudesArray = gameCharacter.getStatesArray();
 		Texture dude = dudesArray[dudeState];
 		int dudeHeight = dude.getHeight();  // Precisely calibrate game character horizontal width
 		int dudeWidth = dude.getWidth();
 		int dudeXCoord = (gameWidth / 2) - (dudeWidth / 2);
+
+		updateCharacterState();
+
+		// Handles jump
+		if (Gdx.input.justTouched()) {
+			jump();
+		}
 
 		fall();
 
