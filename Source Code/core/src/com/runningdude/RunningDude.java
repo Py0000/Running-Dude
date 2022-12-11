@@ -6,22 +6,37 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class RunningDude extends ApplicationAdapter {
-	final int speedControl = 9;
-	final int defaultTimerValue = 0;
-
 	SpriteBatch batch;
+
+	int gameHeight;
+	int gameWidth;
 
 	Texture background;
 	Texture[] dudesArray;
 
+	// Takes care of updating the frame of the game character
+	final int speedControl = 9;
+	final int defaultTimerValue = 0;
+
 	int dudeState = 0;
-	int pauseTimer = 0;
+	int pauseTimer = defaultTimerValue;
+
+	// Takes care of making the game character fall
+	final int minVerticalPos = 180;
+	float gravity = 0.25f;
+	float velocity = 0;
+	int dudeYCoord = minVerticalPos;
+
 
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
 		// Used to draw everything to the screen (visually)
 		batch = new SpriteBatch();
+
+		// Intialise the app width and height on start up
+		gameWidth = Gdx.graphics.getWidth();
+		gameHeight = Gdx.graphics.getHeight();
 
 		//Set up background image
 		background = new Texture("bg.png");
@@ -34,13 +49,16 @@ public class RunningDude extends ApplicationAdapter {
 		dudesArray[3] = new Texture("running-4.png");
 		dudesArray[4] = new Texture("running-5.png");
 		dudesArray[5] = new Texture("running-6.png");
+
+		// Initialise dude vertical position on start up
+		dudeYCoord = (gameHeight / 2);
+
 	}
 
 	// Runs over and over again until the app is done
 	@Override
 	public void render () {
-		int gameWidth = Gdx.graphics.getWidth();
-		int gameHeight = Gdx.graphics.getHeight();
+
 
 		// Start things up
 		batch.begin();
@@ -64,12 +82,22 @@ public class RunningDude extends ApplicationAdapter {
 			}
 		}
 
+		// Set game character based on his state of the game
 		Texture dude = dudesArray[dudeState];
 
+		// Updates falling velocity based on gravity
+		velocity += gravity;
+
+		// Updates game character vertical position as he falls
+		dudeYCoord -= velocity;
+
+		if (dudeYCoord <= minVerticalPos) {
+			dudeYCoord = minVerticalPos;
+		}
+
+		// Precisely calibrate game character horizontal width
 		int dudeWidth = dude.getWidth();
-		int dudeHeight = dude.getHeight();
 		int dudeXCoord = (gameWidth / 2) - (dudeWidth / 2);
-		int dudeYCoord = (gameHeight / 2) - (dudeHeight / 2);
 
 		// Character will fill center of the screen
 		batch.draw(dude, dudeXCoord, dudeYCoord);
