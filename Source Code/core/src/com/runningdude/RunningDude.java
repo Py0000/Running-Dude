@@ -53,6 +53,9 @@ public class RunningDude extends ApplicationAdapter {
 	// Waiting Page
 	Texture waitingPage;
 
+	// Game Over State
+	Texture gameOver;
+
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
@@ -85,6 +88,9 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set up the waiting page
 		waitingPage = new Texture("start.png");
+
+		// Set up game over
+		gameOver = new Texture("game-over.png");
 	}
 
 	// Runs over and over again until the app is done
@@ -114,6 +120,7 @@ public class RunningDude extends ApplicationAdapter {
 			int dizzyXCoord = (gameWidth / 2) - (dizzyDude.getWidth() / 2);
 			batch.draw(dizzyDude, dizzyXCoord, dudeYCoord);
 
+			showGameOverPage();
 			executeGameStart();
 		}
 
@@ -137,6 +144,12 @@ public class RunningDude extends ApplicationAdapter {
 		int xCoord = (gameWidth / 2) - (waitingPage.getWidth() / 2);
 		int yCoord = (gameHeight / 2) - (waitingPage.getHeight() / 2);
 		batch.draw(waitingPage, xCoord, yCoord);
+	}
+
+	private void showGameOverPage() {
+		int xCoord = (gameWidth / 2) - (gameOver.getWidth() / 2);
+		int yCoord = (gameHeight / 2) - (gameOver.getHeight() / 2);
+		batch.draw(gameOver, xCoord, yCoord);
 	}
 
 	private void executeGameStart() {
