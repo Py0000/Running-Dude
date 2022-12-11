@@ -58,6 +58,9 @@ public class RunningDude extends ApplicationAdapter {
 	int score = 0;
 	BitmapFont font;
 
+	// Handles Game State
+	int gameState = 0;
+
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
@@ -118,94 +121,129 @@ public class RunningDude extends ApplicationAdapter {
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
 		batch.draw(background, 0,0, gameWidth, gameHeight);
 
-		// Put a toxin after every 100 iterations of render() function execution
-		if (toxinCount < 250) {
-			toxinCount++;
-		} else {
-			toxinCount = 0;
-			spreadToxins();
-		}
-
-		// Clear everything in toxin rectangle
-		toxinRectangles.clear();
-
-		// Draw the toxins on the screen
-		for (int i = 0; i < toxinXPositions.size(); i++) {
-			batch.draw(toxin, toxinXPositions.get(i), toxinYPositions.get(i));
-
-			// Moves to the left
-			toxinXPositions.set(i, toxinXPositions.get(i) - 6);
-
-			// Set parameter of toxin to its current position, height and width
-			toxinRectangles.add(new Rectangle(toxinXPositions.get(i), toxinYPositions.get(i), toxin.getWidth(), toxin.getHeight()));
-		}
-
-		// Put a diamond after every 100 iterations of render() function execution
-		if (diamondCount < 100) {
-			diamondCount++;
-		} else {
-			diamondCount = 0;
-			spreadDiamonds();
-		}
-
-		// Clear everything in diamond rectangle
-		diamondRectangles.clear();
-
-		// Draw the diamonds on the screen
-		for (int i = 0; i < diamondXPositions.size(); i++) {
-			batch.draw(diamond, diamondXPositions.get(i), diamondYPositions.get(i));
-
-			// Moves to the left
-			diamondXPositions.set(i, diamondXPositions.get(i) - 4);
-
-			// Set parameter of diamond to its current position, height and width
-			diamondRectangles.add(new Rectangle(diamondXPositions.get(i), diamondYPositions.get(i), diamond.getWidth(), diamond.getHeight()));
-		}
-
-		// Handles jump
-		if (Gdx.input.justTouched()) {
-			velocity = jumpHeight;
-		}
-
-		// Updates Character state every 10 iterations of render() function execution
-		if (pauseTimer < speedControl) {
-			pauseTimer++;
-		} else {
-			// Reset pause timer
-			pauseTimer = defaultTimerValue;
-
-			// "Loops" through the 6 different frame of dude
-			// Creates an illusion of the dude "running"
-			if (dudeState < dudesArray.length - 1) {
-				dudeState++;
+		// Handles Game State
+		if (gameState == 1) {
+			// Game is live
+			// Put a toxin after every 100 iterations of render() function execution
+			if (toxinCount < 250) {
+				toxinCount++;
 			} else {
-				dudeState--;
+				toxinCount = 0;
+				spreadToxins();
 			}
+
+			// Clear everything in toxin rectangle
+			toxinRectangles.clear();
+
+			// Draw the toxins on the screen
+			for (int i = 0; i < toxinXPositions.size(); i++) {
+				batch.draw(toxin, toxinXPositions.get(i), toxinYPositions.get(i));
+
+				// Moves to the left
+				toxinXPositions.set(i, toxinXPositions.get(i) - 6);
+
+				// Set parameter of toxin to its current position, height and width
+				toxinRectangles.add(new Rectangle(toxinXPositions.get(i), toxinYPositions.get(i), toxin.getWidth(), toxin.getHeight()));
+			}
+
+			// Put a diamond after every 100 iterations of render() function execution
+			if (diamondCount < 100) {
+				diamondCount++;
+			} else {
+				diamondCount = 0;
+				spreadDiamonds();
+			}
+
+			// Clear everything in diamond rectangle
+			diamondRectangles.clear();
+
+			// Draw the diamonds on the screen
+			for (int i = 0; i < diamondXPositions.size(); i++) {
+				batch.draw(diamond, diamondXPositions.get(i), diamondYPositions.get(i));
+
+				// Moves to the left
+				diamondXPositions.set(i, diamondXPositions.get(i) - 4);
+
+				// Set parameter of diamond to its current position, height and width
+				diamondRectangles.add(new Rectangle(diamondXPositions.get(i), diamondYPositions.get(i), diamond.getWidth(), diamond.getHeight()));
+			}
+
+			// Handles jump
+			if (Gdx.input.justTouched()) {
+				velocity = jumpHeight;
+			}
+
+			// Updates Character state every 10 iterations of render() function execution
+			if (pauseTimer < speedControl) {
+				pauseTimer++;
+			} else {
+				// Reset pause timer
+				pauseTimer = defaultTimerValue;
+
+				// "Loops" through the 6 different frame of dude
+				// Creates an illusion of the dude "running"
+				if (dudeState < dudesArray.length - 1) {
+					dudeState++;
+				} else {
+					dudeState--;
+				}
+			}
+
+			// Set game character based on his state of the game
+			Texture dude = dudesArray[dudeState];
+
+			// Updates falling velocity based on gravity
+			velocity += (gravity * velocityMultipler);
+
+			// Updates game character vertical position as he falls
+			dudeYCoord -= velocity;
+
+			if (dudeYCoord <= minVerticalPos) {
+				dudeYCoord = minVerticalPos;
+			}
+
+			// Precisely calibrate game character horizontal width
+			int dudeHeight = dude.getHeight();
+			int dudeWidth = dude.getWidth();
+			int dudeXCoord = (gameWidth / 2) - (dudeWidth / 2);
+
+			// Character will fill center of the screen
+			batch.draw(dude, dudeXCoord, dudeYCoord);
+
+			// Set parameter of game character to his current position, height and width
+			dudeRectangle = new Rectangle(dudeXCoord, dudeYCoord, dudeWidth, dudeHeight);
+
 		}
 
-		// Set game character based on his state of the game
-		Texture dude = dudesArray[dudeState];
+		else if (gameState == 0) {
+			// Waiting to start
+			if (Gdx.input.justTouched()) {
+				gameState = 1;
+			}
 
-		// Updates falling velocity based on gravity
-		velocity += (gravity * velocityMultipler);
-
-		// Updates game character vertical position as he falls
-		dudeYCoord -= velocity;
-
-		if (dudeYCoord <= minVerticalPos) {
-			dudeYCoord = minVerticalPos;
 		}
 
-		// Precisely calibrate game character horizontal width
-		int dudeHeight = dude.getHeight();
-		int dudeWidth = dude.getWidth();
-		int dudeXCoord = (gameWidth / 2) - (dudeWidth / 2);
 
-		// Character will fill center of the screen
-		batch.draw(dude, dudeXCoord, dudeYCoord);
+		else if (gameState == 2) {
+			// Game over
+			if (Gdx.input.justTouched()) {
+				gameState = 1;
+				dudeYCoord = (gameHeight / 2);
+				score = 0;
+				velocity = 0;
+				diamondXPositions.clear();
+				diamondYPositions.clear();
+				diamondRectangles.clear();
+				diamondCount = 0;
+				toxinXPositions.clear();
+				toxinYPositions.clear();
+				toxinRectangles.clear();
+				toxinCount = 0;
+			}
 
-		// Set parameter of game character to his current position, height and width
-		dudeRectangle = new Rectangle(dudeXCoord, dudeYCoord, dudeWidth, dudeHeight);
+
+		}
+
 
 		// Check if game character collects a coin
 		for (int i = 0; i < diamondRectangles.size(); i++) {
@@ -222,12 +260,7 @@ public class RunningDude extends ApplicationAdapter {
 		// Check if game character hits a toxin
 		for (int i = 0; i < toxinRectangles.size(); i++) {
 			if (Intersector.overlaps(dudeRectangle, toxinRectangles.get(i))) {
-				score -= 2;
-
-				toxinRectangles.remove(i);
-				toxinXPositions.remove(i);
-				toxinYPositions.remove(i);
-				break;
+				gameState = 2;
 			}
 		}
 
