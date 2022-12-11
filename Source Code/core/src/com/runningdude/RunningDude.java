@@ -20,6 +20,7 @@ public class RunningDude extends ApplicationAdapter {
 
 	Texture background;
 	Texture[] dudesArray;
+	Texture dizzyDude;
 	Rectangle dudeRectangle; // Holds parameter of game character
 
 	// Takes care of updating the frame of the game character
@@ -82,6 +83,8 @@ public class RunningDude extends ApplicationAdapter {
 		dudesArray[3] = new Texture("running-4.png");
 		dudesArray[4] = new Texture("running-5.png");
 		dudesArray[5] = new Texture("running-6.png");
+
+		dizzyDude = new Texture("dizzy.png");
 
 		// Initialise dude vertical position on start up
 		dudeYCoord = (gameHeight / 2);
@@ -226,6 +229,8 @@ public class RunningDude extends ApplicationAdapter {
 
 		else if (gameState == 2) {
 			// Game over
+			batch.draw(dizzyDude, (gameWidth / 2) - (dizzyDude.getWidth()/2), dudeYCoord);
+
 			if (Gdx.input.justTouched()) {
 				gameState = 1;
 				dudeYCoord = (gameHeight / 2);
@@ -240,7 +245,6 @@ public class RunningDude extends ApplicationAdapter {
 				toxinRectangles.clear();
 				toxinCount = 0;
 			}
-
 
 		}
 
