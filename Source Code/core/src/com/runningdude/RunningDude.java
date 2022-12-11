@@ -6,12 +6,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class RunningDude extends ApplicationAdapter {
+	final int speedControl = 9;
+	final int defaultTimerValue = 0;
+
 	SpriteBatch batch;
 
 	Texture background;
 	Texture[] dudesArray;
 
 	int dudeState = 0;
+	int pauseTimer = 0;
 
 	// Called when the app is opened for the first time
 	@Override
@@ -44,12 +48,20 @@ public class RunningDude extends ApplicationAdapter {
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
 		batch.draw(background, 0,0, gameWidth, gameHeight);
 
-		// "Loops" through the 6 different frame of dude
-		// Creates an illusion of the dude "running"
-		if (dudeState < 5) {
-			dudeState++;
+		// Updates Character state every 10 iteration of render() function execution
+		if (pauseTimer < speedControl) {
+			pauseTimer++;
 		} else {
-			dudeState--;
+			// Reset pause timer
+			pauseTimer = defaultTimerValue;
+
+			// "Loops" through the 6 different frame of dude
+			// Creates an illusion of the dude "running"
+			if (dudeState < dudesArray.length - 1) {
+				dudeState++;
+			} else {
+				dudeState--;
+			}
 		}
 
 		Texture dude = dudesArray[dudeState];
