@@ -5,6 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class RunningDude extends ApplicationAdapter {
 	SpriteBatch batch;
 
@@ -15,7 +18,7 @@ public class RunningDude extends ApplicationAdapter {
 	Texture[] dudesArray;
 
 	// Takes care of updating the frame of the game character
-	final int speedControl = 9;
+	final int speedControl = 10;
 	final int defaultTimerValue = 0;
 
 	int dudeState = 0;
@@ -23,12 +26,22 @@ public class RunningDude extends ApplicationAdapter {
 
 	// Takes care of making the game character fall
 	final int minVerticalPos = 180;
+	final float velocityMultipler = 3.75f;
 	float gravity = 0.25f;
 	float velocity = 0;
 	int dudeYCoord = minVerticalPos;
 
 	// Takes care of making the game character jump
 	final int jumpHeight = -15;
+
+	// Takes care of coins position
+	Random random = new Random();
+	Texture coin;
+	ArrayList<Integer> coinXPositions = new ArrayList<>();
+	ArrayList<Integer> coinYPositions = new ArrayList<>();
+	int coinCount;
+
+	
 
 
 	// Called when the app is opened for the first time
@@ -56,25 +69,48 @@ public class RunningDude extends ApplicationAdapter {
 		// Initialise dude vertical position on start up
 		dudeYCoord = (gameHeight / 2);
 
+		// Set up the coin
+		coin = new Texture("coin.png");
+	}
+
+	public void spreadCoin() {
+		float height = (random.nextFloat() * gameHeight) + minVerticalPos;
+
+		coinYPositions.add((int)height);
+		coinXPositions.add(gameWidth);
 	}
 
 	// Runs over and over again until the app is done
 	@Override
 	public void render () {
-
-
 		// Start things up
 		batch.begin();
 
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
 		batch.draw(background, 0,0, gameWidth, gameHeight);
 
+		// Put a coin after every 100 iterations of render() function execution
+		if (coinCount < 100) {
+			coinCount++;
+		} else {
+			coinCount = 0;
+			spreadCoin();
+		}
+
+		// Draw the coins on the screen
+		for (int i = 0; i < coinXPositions.size(); i++) {
+			batch.draw(coin, coinXPositions.get(i), coinYPositions.get(i));
+
+			// Moves to the left
+			coinXPositions.set(i, coinXPositions.get(i) - 4);
+		}
+
 		// Handles jump
 		if (Gdx.input.justTouched()) {
 			velocity = jumpHeight;
 		}
 
-		// Updates Character state every 10 iteration of render() function execution
+		// Updates Character state every 10 iterations of render() function execution
 		if (pauseTimer < speedControl) {
 			pauseTimer++;
 		} else {
@@ -94,7 +130,7 @@ public class RunningDude extends ApplicationAdapter {
 		Texture dude = dudesArray[dudeState];
 
 		// Updates falling velocity based on gravity
-		velocity += gravity;
+		velocity += (gravity * velocityMultipler);
 
 		// Updates game character vertical position as he falls
 		dudeYCoord -= velocity;
