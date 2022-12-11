@@ -2,6 +2,7 @@ package com.runningdude;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.List;
@@ -66,5 +67,9 @@ public class GameAccessory {
         drawAccessory(batch, xCoords, yCoords, index);
         shiftAccessoryLeft(xCoords, index, factor);
         setAccessoryHitBox(xCoords, yCoords, parameters, index);
+    }
+
+    public boolean isHitBoxInRange(Rectangle range, Rectangle hitBox) {
+        return Intersector.overlaps(range, hitBox);
     }
 }
