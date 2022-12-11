@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class RunningDude extends ApplicationAdapter {
 
 	Texture background;
 	Texture[] dudesArray;
+	Rectangle dudeRectangle; // Holds parameter of game character
 
 	// Takes care of updating the frame of the game character
 	final int speedControl = 10;
@@ -40,12 +42,14 @@ public class RunningDude extends ApplicationAdapter {
 	Texture diamond;
 	ArrayList<Integer> diamondXPositions = new ArrayList<>();
 	ArrayList<Integer> diamondYPositions = new ArrayList<>();
+	ArrayList<Rectangle> diamondRectangles = new ArrayList<>(); //Holds the parameter of the diamond
 	int diamondCount;
 
 	// Takes care of toxins position
 	Texture toxin;
 	ArrayList<Integer> toxinXPositions = new ArrayList<>();
 	ArrayList<Integer> toxinYPositions = new ArrayList<>();
+	ArrayList<Rectangle> toxinRectangles = new ArrayList<>(); //Holds teh parameter of the toxin
 	int toxinCount;
 
 
@@ -109,8 +113,11 @@ public class RunningDude extends ApplicationAdapter {
 			toxinCount++;
 		} else {
 			toxinCount = 0;
-			spreadDiamonds();
+			spreadToxins();
 		}
+
+		// Clear everything in toxin rectangle
+		toxinRectangles.clear();
 
 		// Draw the toxins on the screen
 		for (int i = 0; i < toxinXPositions.size(); i++) {
@@ -118,6 +125,9 @@ public class RunningDude extends ApplicationAdapter {
 
 			// Moves to the left
 			toxinXPositions.set(i, toxinXPositions.get(i) - 6);
+
+			// Set parameter of toxin to its current position, height and width
+			toxinRectangles.add(new Rectangle(toxinXPositions.get(i), toxinYPositions.get(i), toxin.getWidth(), toxin.getHeight()));
 		}
 
 		// Put a diamond after every 100 iterations of render() function execution
@@ -128,12 +138,18 @@ public class RunningDude extends ApplicationAdapter {
 			spreadDiamonds();
 		}
 
+		// Clear everything in diamond rectangle
+		diamondRectangles.clear();
+
 		// Draw the diamonds on the screen
 		for (int i = 0; i < diamondXPositions.size(); i++) {
 			batch.draw(diamond, diamondXPositions.get(i), diamondYPositions.get(i));
 
 			// Moves to the left
 			diamondXPositions.set(i, diamondXPositions.get(i) - 4);
+
+			// Set parameter of diamond to its current position, height and width
+			diamondRectangles.add(new Rectangle(diamondXPositions.get(i), diamondYPositions.get(i), diamond.getWidth(), diamond.getHeight()));
 		}
 
 		// Handles jump
@@ -171,11 +187,30 @@ public class RunningDude extends ApplicationAdapter {
 		}
 
 		// Precisely calibrate game character horizontal width
+		int dudeHeight = dude.getHeight();
 		int dudeWidth = dude.getWidth();
 		int dudeXCoord = (gameWidth / 2) - (dudeWidth / 2);
 
 		// Character will fill center of the screen
 		batch.draw(dude, dudeXCoord, dudeYCoord);
+
+		// Set parameter of game character to his current position, height and width
+		dudeRectangle = new Rectangle(dudeXCoord, dudeYCoord, dudeWidth, dudeHeight);
+
+		// Check if game character collects a coin
+		for (int i = 0; i < diamondRectangles.size(); i++) {
+			if (Intersector.overlaps(dudeRectangle, diamondRectangles.get(i))) {
+				Gdx.app.log("Diamond", "Gotten it!!!");
+			}
+		}
+
+		// Check if game character hits a toxin
+		for (int i = 0; i < toxinRectangles.size(); i++) {
+			if (Intersector.overlaps(dudeRectangle, toxinRectangles.get(i))) {
+				Gdx.app.log("Toxin", "Oh No!!!");
+			}
+		}
+
 
 		// Finish putting things on the screen
 		batch.end();
