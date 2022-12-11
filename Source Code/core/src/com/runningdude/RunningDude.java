@@ -2,7 +2,9 @@ package com.runningdude;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
@@ -52,6 +54,9 @@ public class RunningDude extends ApplicationAdapter {
 	ArrayList<Rectangle> toxinRectangles = new ArrayList<>(); //Holds teh parameter of the toxin
 	int toxinCount;
 
+	// Handles the score
+	int score = 0;
+	BitmapFont font;
 
 	// Called when the app is opened for the first time
 	@Override
@@ -83,6 +88,11 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set up the toxin
 		toxin = new Texture("toxin.png");
+
+		// Set up the scoreboard
+		font = new BitmapFont();
+		font.setColor(Color.WHITE);
+		font.getData().setScale(8);
 	}
 
 	public void spreadDiamonds() {
@@ -200,17 +210,29 @@ public class RunningDude extends ApplicationAdapter {
 		// Check if game character collects a coin
 		for (int i = 0; i < diamondRectangles.size(); i++) {
 			if (Intersector.overlaps(dudeRectangle, diamondRectangles.get(i))) {
-				Gdx.app.log("Diamond", "Gotten it!!!");
+				score++;
+
+				diamondRectangles.remove(i);
+				diamondXPositions.remove(i);
+				diamondYPositions.remove(i);
+				break;
 			}
 		}
 
 		// Check if game character hits a toxin
 		for (int i = 0; i < toxinRectangles.size(); i++) {
 			if (Intersector.overlaps(dudeRectangle, toxinRectangles.get(i))) {
-				Gdx.app.log("Toxin", "Oh No!!!");
+				score -= 2;
+
+				toxinRectangles.remove(i);
+				toxinXPositions.remove(i);
+				toxinYPositions.remove(i);
+				break;
 			}
 		}
 
+		// Shows the score on the screen
+		font.draw(batch, String.valueOf(score), gameWidth - 200, 150);
 
 		// Finish putting things on the screen
 		batch.end();
