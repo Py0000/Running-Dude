@@ -27,6 +27,9 @@ public class RunningDude extends ApplicationAdapter {
 	float velocity = 0;
 	int dudeYCoord = minVerticalPos;
 
+	// Takes care of making the game character jump
+	final int jumpHeight = -15;
+
 
 	// Called when the app is opened for the first time
 	@Override
@@ -65,6 +68,11 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
 		batch.draw(background, 0,0, gameWidth, gameHeight);
+
+		// Handles jump
+		if (Gdx.input.justTouched()) {
+			velocity = jumpHeight;
+		}
 
 		// Updates Character state every 10 iteration of render() function execution
 		if (pauseTimer < speedControl) {
@@ -110,6 +118,5 @@ public class RunningDude extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		batch.dispose();
-
 	}
 }
