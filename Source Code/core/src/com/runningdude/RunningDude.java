@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -34,14 +35,18 @@ public class RunningDude extends ApplicationAdapter {
 	// Takes care of making the game character jump
 	final int jumpHeight = -15;
 
-	// Takes care of coins position
+	// Takes care of diamond position
 	Random random = new Random();
-	Texture coin;
-	ArrayList<Integer> coinXPositions = new ArrayList<>();
-	ArrayList<Integer> coinYPositions = new ArrayList<>();
-	int coinCount;
+	Texture diamond;
+	ArrayList<Integer> diamondXPositions = new ArrayList<>();
+	ArrayList<Integer> diamondYPositions = new ArrayList<>();
+	int diamondCount;
 
-	
+	// Takes care of toxins position
+	Texture toxin;
+	ArrayList<Integer> toxinXPositions = new ArrayList<>();
+	ArrayList<Integer> toxinYPositions = new ArrayList<>();
+	int toxinCount;
 
 
 	// Called when the app is opened for the first time
@@ -69,15 +74,25 @@ public class RunningDude extends ApplicationAdapter {
 		// Initialise dude vertical position on start up
 		dudeYCoord = (gameHeight / 2);
 
-		// Set up the coin
-		coin = new Texture("coin.png");
+		// Set up the toxin
+		diamond = new Texture("diamond.png");
+
+		// Set up the toxin
+		toxin = new Texture("toxin.png");
 	}
 
-	public void spreadCoin() {
+	public void spreadDiamonds() {
 		float height = (random.nextFloat() * gameHeight) + minVerticalPos;
 
-		coinYPositions.add((int)height);
-		coinXPositions.add(gameWidth);
+		diamondYPositions.add((int)height);
+		diamondXPositions.add(gameWidth);
+	}
+
+	public void spreadToxins() {
+		float height = (random.nextFloat() * gameHeight) + minVerticalPos;
+
+		toxinYPositions.add((int)height);
+		toxinXPositions.add(gameWidth);
 	}
 
 	// Runs over and over again until the app is done
@@ -89,20 +104,36 @@ public class RunningDude extends ApplicationAdapter {
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
 		batch.draw(background, 0,0, gameWidth, gameHeight);
 
-		// Put a coin after every 100 iterations of render() function execution
-		if (coinCount < 100) {
-			coinCount++;
+		// Put a toxin after every 100 iterations of render() function execution
+		if (toxinCount < 250) {
+			toxinCount++;
 		} else {
-			coinCount = 0;
-			spreadCoin();
+			toxinCount = 0;
+			spreadDiamonds();
 		}
 
-		// Draw the coins on the screen
-		for (int i = 0; i < coinXPositions.size(); i++) {
-			batch.draw(coin, coinXPositions.get(i), coinYPositions.get(i));
+		// Draw the toxins on the screen
+		for (int i = 0; i < toxinXPositions.size(); i++) {
+			batch.draw(toxin, toxinXPositions.get(i), toxinYPositions.get(i));
 
 			// Moves to the left
-			coinXPositions.set(i, coinXPositions.get(i) - 4);
+			toxinXPositions.set(i, toxinXPositions.get(i) - 6);
+		}
+
+		// Put a diamond after every 100 iterations of render() function execution
+		if (diamondCount < 100) {
+			diamondCount++;
+		} else {
+			diamondCount = 0;
+			spreadDiamonds();
+		}
+
+		// Draw the diamonds on the screen
+		for (int i = 0; i < diamondXPositions.size(); i++) {
+			batch.draw(diamond, diamondXPositions.get(i), diamondYPositions.get(i));
+
+			// Moves to the left
+			diamondXPositions.set(i, diamondXPositions.get(i) - 4);
 		}
 
 		// Handles jump
