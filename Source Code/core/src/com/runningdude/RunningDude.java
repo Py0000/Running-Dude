@@ -58,6 +58,7 @@ public class RunningDude extends ApplicationAdapter {
 
 	// Game Over State
 	Texture gameOver;
+	int countdown = Utilities.DEFAULT_COUNTDOWN;
 
 	// Highscore State
 	BitmapFont highScoreFont;
@@ -153,7 +154,11 @@ public class RunningDude extends ApplicationAdapter {
 			showScore();
 			saveHighScore(score);
 			showGameOverPage();
-			executeGameStart();
+			if (countdown > 0) {
+				countdown--;
+			} else {
+				executeGameStart();
+			}
 		}
 
 		calculateScore();
@@ -219,6 +224,7 @@ public class RunningDude extends ApplicationAdapter {
 			toxinYCoords.clear();
 			toxinParameters.clear();
 			toxinCount = Utilities.DEFAULT_TOXIN_COUNT;
+			countdown = Utilities.DEFAULT_COUNTDOWN;
 		}
 	}
 

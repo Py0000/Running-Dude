@@ -32,4 +32,7 @@ public abstract class Utilities {
     public static final int NORMAL_MODE = 1; // Default Mode
     public static final int HARD_MODE = 2;
     public static final int KILLER_MODE = 3;
+
+    // Gameover
+    public static final int DEFAULT_COUNTDOWN = 65;
 }
