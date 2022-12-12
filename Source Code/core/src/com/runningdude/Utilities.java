@@ -23,6 +23,12 @@ public abstract class Utilities {
     public static final int[] TOXIN_FACTORS = {10, 15, 23, 28};
     public static final int DEFAULT_TOXIN_COUNT = 0;
 
+    // Involves with generating the first aid
+    public static final int[] AID_FREQUENCIES = {675, 1000, 1350, 1800};
+    public static final int[] AID_FACTORS = {10, 15, 23, 30};
+    public static final int DEFAULT_AID_COUNT = 0;
+    public static final int BONUS_SCORE = 2;
+
     // Involves with scoreboard
     public static final int DEFAULT_SCORE = 0;
     public static final String[] HIGHSCORE_TAGs = {"highscore-easy", "highscore-normal", "highscore-hard", "highscore-killer"};
@@ -40,5 +46,7 @@ public abstract class Utilities {
     public static final int HEALTH_FULL = 0;
     public static final int HEALTH_ACCEPTABLE = 1;
     public static final int HEALTH_DANGER = 2;
+    public static final int DAMAGE_MODE = -1;
+    public static final int BLESSING_MODE = -2;
 
 }
