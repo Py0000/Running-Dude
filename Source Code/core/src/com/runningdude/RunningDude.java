@@ -1,15 +1,20 @@
 package com.runningdude;
 
+import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class RunningDude extends ApplicationAdapter {
 	// Fields required to setup the application
@@ -61,15 +66,30 @@ public class RunningDude extends ApplicationAdapter {
 	BitmapFont highScoreFont;
 	Preferences pref;
 
+	// Input Motion Detector
+	OrthographicCamera cam;
+
+	// Game Mode
+	int gameMode = Utilities.NORMAL_MODE;
+	Texture easyBox;
+	Rectangle easyRec;
+	Texture normalBox;
+	Rectangle normalRec;
+	Texture hardBox;
+	Rectangle hardRec;
+
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
-		// Used to draw everything to the screen (visually)
-		batch = new SpriteBatch();
-
 		// Intializes the app width and height on start up
 		gameWidth = Gdx.graphics.getWidth();
 		gameHeight = Gdx.graphics.getHeight();
+
+		cam = new OrthographicCamera();
+		cam.setToOrtho(false, gameWidth, gameHeight);
+
+		// Used to draw everything to the screen (visually)
+		batch = new SpriteBatch();
 
 		// Initialise dude vertical position on start up
 		dudeYCoord = (gameHeight / 2);
@@ -93,6 +113,9 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set up the waiting page
 		waitingPage = new Texture("start.png");
+		easyBox = new Texture("easy.png");
+		normalBox = new Texture("normal.png");
+		hardBox = new Texture("hard.png");
 
 		// Set up game over
 		gameOver = new Texture("game-over.png");
@@ -107,7 +130,13 @@ public class RunningDude extends ApplicationAdapter {
 	// Runs over and over again until the app is done
 	@Override
 	public void render () {
+		// Start cam up
+		Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+		Gdx.gl.glClear(GL_COLOR_BUFFER_BIT);
+		cam.update();
+
 		// Start things up
+		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
 
 		// Background starts at pos 0 for both x and y coordinates and fills entire screen.
@@ -118,7 +147,8 @@ public class RunningDude extends ApplicationAdapter {
 		if (gameState == Utilities.GAME_WAITING_STATE) {
 			// Waiting to start
 			setUpWaitingPage();
-			executeGameStart();
+			proceedToStartGame();
+			//executeGameStart();
 		}
 
 		// Game is ongoing
@@ -131,6 +161,7 @@ public class RunningDude extends ApplicationAdapter {
 			int dizzyXCoord = (gameWidth / 2) - (dizzyDude.getWidth() / 2);
 			batch.draw(dizzyDude, dizzyXCoord, dudeYCoord);
 
+			showScore();
 			saveHighScore(score);
 			showGameOverPage();
 			executeGameStart();
@@ -138,12 +169,6 @@ public class RunningDude extends ApplicationAdapter {
 
 		calculateScore();
 		detectGameOver();
-
-		// Shows the score on the screen
-		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
-
-		// Shows the highscore on the screen
-		highScoreFont.draw(batch, "Best: " + pref.getInteger("highscore", 0), 100, 150);
 
 		// Finish putting things on the screen
 		batch.end();
@@ -155,10 +180,56 @@ public class RunningDude extends ApplicationAdapter {
 		batch.dispose();
 	}
 
+	private void showScore() {
+		// Shows the score on the screen
+		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
+
+		// Shows the highscore on the screen
+		highScoreFont.draw(batch, "Best: " + pref.getInteger("highscore", 0), 100, 150);
+	}
+
+	private void proceedToStartGame() {
+		int xCoord = Gdx.input.getX();
+		int yCoord = Gdx.input.getY();
+
+		Vector3 input = new Vector3(xCoord, yCoord, 0);
+		cam.unproject(input);
+
+		if (Gdx.input.justTouched()) {
+			if (easyRec.contains(input.x, input.y)) {
+				gameMode = Utilities.EASY_MODE;
+			}
+
+			if (normalRec.contains(input.x, input.y)) {
+				gameMode = Utilities.NORMAL_MODE;
+			}
+
+			if (hardRec.contains(input.x, input.y)) {
+				gameMode = Utilities.HARD_MODE;
+			}
+
+			executeGameStart();
+		}
+
+	}
+
 	private void setUpWaitingPage() {
-		int xCoord = (gameWidth / 2) - (waitingPage.getWidth() / 2);
-		int yCoord = (gameHeight / 2) - (waitingPage.getHeight() / 2);
-		batch.draw(waitingPage, xCoord, yCoord);
+		int xEasy = (gameWidth / 2) - (easyBox.getWidth() / 2);
+		int yEasy = 3 * (gameHeight / 4) - (easyBox.getHeight() / 2);
+
+		int xNormal = (gameWidth / 2) - (normalBox.getWidth() / 2);
+		int yNormal = (gameHeight / 2) - (normalBox.getHeight() / 2);
+
+		int xHard = (gameWidth / 2) - (hardBox.getWidth() / 2);
+		int yHard = (gameHeight / 4) - (hardBox.getHeight() / 2);
+
+		easyRec = new Rectangle(xEasy, yEasy, easyBox.getWidth(), easyBox.getHeight());
+		normalRec = new Rectangle(xNormal, yNormal, normalBox.getWidth(), normalBox.getHeight());
+		hardRec = new Rectangle(xHard, yHard, hardBox.getWidth(), hardBox.getHeight());
+
+		batch.draw(easyBox, xEasy, yEasy);
+		batch.draw(normalBox, xNormal, yNormal);
+		batch.draw(hardBox, xHard, yHard);
 	}
 
 	private void showGameOverPage() {
@@ -218,11 +289,13 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set parameter of game character to his current position, height and width
 		dudeRectangle = gameCharacter.setGameCharacterHitRange(dudeXCoord, dudeYCoord, dudeWidth, dudeHeight);
+
+		showScore();
 	}
 
 	private void updateCharacterState() {
 		// Updates Character state every 10 iterations of render() function execution
-		if (pauseTimer < Utilities.SPEED_CONTROL) {
+		if (pauseTimer < Utilities.SPEED_CONTROL[gameMode]) {
 			pauseTimer++;
 		} else {
 			// Reset pause timer
@@ -252,27 +325,27 @@ public class RunningDude extends ApplicationAdapter {
 
 	private void printToxinsToScreen() {
 		// Put a toxin after every 250 iterations of render() function execution
-		toxinCount = toxin.putAccessoryAndUpdateCount(toxinXCoords, toxinYCoords, gameWidth, gameHeight, toxinCount, Utilities.TOXIN_FREQUENCY);
+		toxinCount = toxin.putAccessoryAndUpdateCount(toxinXCoords, toxinYCoords, gameWidth, gameHeight, toxinCount, Utilities.TOXIN_FREQUENCIES[gameMode]);
 
 		// Clear everything in toxin rectangle
 		toxinParameters.clear();
 
 		// Draw the toxins on the screen
 		for (int i = 0; i < toxinXCoords.size(); i++) {
-			toxin.setUpAccessory(batch, toxinXCoords, toxinYCoords, toxinParameters, i, Utilities.TOXIN_FACTOR);
+			toxin.setUpAccessory(batch, toxinXCoords, toxinYCoords, toxinParameters, i, Utilities.TOXIN_FACTORS[gameMode]);
 		}
 	}
 
 	private void printDiamondsToScreen() {
 		// Put a diamond after every 100 iterations of render() function execution
-		diamondCount = diamond.putAccessoryAndUpdateCount(diamondXCoords, diamondYCoords, gameWidth, gameHeight, diamondCount, Utilities.DIAMOND_FREQUENCY);
+		diamondCount = diamond.putAccessoryAndUpdateCount(diamondXCoords, diamondYCoords, gameWidth, gameHeight, diamondCount, Utilities.DIAMOND_FREQUENCIES[gameMode]);
 
 		// Clear everything in diamond rectangle
 		diamondParameters.clear();
 
 		// Draw the diamonds on the screen
 		for (int i = 0; i < diamondXCoords.size(); i++) {
-			diamond.setUpAccessory(batch, diamondXCoords, diamondYCoords, diamondParameters, i, Utilities.DIAMOND_FACTOR);
+			diamond.setUpAccessory(batch, diamondXCoords, diamondYCoords, diamondParameters, i, Utilities.DIAMOND_FACTORS[gameMode]);
 		}
 	}
 
