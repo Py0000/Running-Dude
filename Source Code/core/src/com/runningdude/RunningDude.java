@@ -67,13 +67,8 @@ public class RunningDude extends ApplicationAdapter {
 	OrthographicCamera cam;
 
 	// Game Mode
+	GameMode gMode;
 	int gameMode = Utilities.NORMAL_MODE;
-	Texture easyBox;
-	Rectangle easyRec;
-	Texture normalBox;
-	Rectangle normalRec;
-	Texture hardBox;
-	Rectangle hardRec;
 
 	// Called when the app is opened for the first time
 	@Override
@@ -109,9 +104,7 @@ public class RunningDude extends ApplicationAdapter {
 		scoreFont.getData().setScale(8);
 
 		// Set up the waiting page
-		easyBox = new Texture("easy.png");
-		normalBox = new Texture("normal.png");
-		hardBox = new Texture("hard.png");
+		gMode = new GameMode();
 
 		// Set up game over
 		gameOver = new Texture("game-over.png");
@@ -142,7 +135,7 @@ public class RunningDude extends ApplicationAdapter {
 
 		if (gameState == Utilities.GAME_WAITING_STATE) {
 			// Waiting to start
-			setUpWaitingPage();
+			gMode.setUpWaitingPage(batch, gameWidth, gameHeight);
 			proceedToStartGame();
 			//executeGameStart();
 		}
@@ -192,39 +185,9 @@ public class RunningDude extends ApplicationAdapter {
 		cam.unproject(input);
 
 		if (Gdx.input.justTouched()) {
-			if (easyRec.contains(input.x, input.y)) {
-				gameMode = Utilities.EASY_MODE;
-			}
-
-			if (normalRec.contains(input.x, input.y)) {
-				gameMode = Utilities.NORMAL_MODE;
-			}
-
-			if (hardRec.contains(input.x, input.y)) {
-				gameMode = Utilities.HARD_MODE;
-			}
-
+			gameMode = gMode.setGameMode(input, gameMode);
 			executeGameStart();
 		}
-	}
-
-	private void setUpWaitingPage() {
-		int xEasy = (gameWidth / 2) - (easyBox.getWidth() / 2);
-		int yEasy = 3 * (gameHeight / 4) - (easyBox.getHeight() / 2);
-
-		int xNormal = (gameWidth / 2) - (normalBox.getWidth() / 2);
-		int yNormal = (gameHeight / 2) - (normalBox.getHeight() / 2);
-
-		int xHard = (gameWidth / 2) - (hardBox.getWidth() / 2);
-		int yHard = (gameHeight / 4) - (hardBox.getHeight() / 2);
-
-		easyRec = new Rectangle(xEasy, yEasy, easyBox.getWidth(), easyBox.getHeight());
-		normalRec = new Rectangle(xNormal, yNormal, normalBox.getWidth(), normalBox.getHeight());
-		hardRec = new Rectangle(xHard, yHard, hardBox.getWidth(), hardBox.getHeight());
-
-		batch.draw(easyBox, xEasy, yEasy);
-		batch.draw(normalBox, xNormal, yNormal);
-		batch.draw(hardBox, xHard, yHard);
 	}
 
 	private void showGameOverPage() {
@@ -289,7 +252,7 @@ public class RunningDude extends ApplicationAdapter {
 	}
 
 	private void updateCharacterState() {
-		// Updates Character state every 10 iterations of render() function execution
+		// Updates Character state every few iterations of render() function execution
 		if (pauseTimer < Utilities.SPEED_CONTROL[gameMode]) {
 			pauseTimer++;
 		} else {
