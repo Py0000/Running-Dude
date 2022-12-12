@@ -2,6 +2,7 @@ package com.runningdude;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -56,6 +57,10 @@ public class RunningDude extends ApplicationAdapter {
 	// Game Over State
 	Texture gameOver;
 
+	// Highscore State
+	BitmapFont highScoreFont;
+	Preferences pref;
+
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
@@ -91,6 +96,12 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set up game over
 		gameOver = new Texture("game-over.png");
+
+		// HighScore
+		pref = Gdx.app.getPreferences("highscore");
+		highScoreFont = new BitmapFont();
+		highScoreFont.setColor(Color.WHITE);
+		highScoreFont.getData().setScale(8);
 	}
 
 	// Runs over and over again until the app is done
@@ -120,6 +131,7 @@ public class RunningDude extends ApplicationAdapter {
 			int dizzyXCoord = (gameWidth / 2) - (dizzyDude.getWidth() / 2);
 			batch.draw(dizzyDude, dizzyXCoord, dudeYCoord);
 
+			saveHighScore(score);
 			showGameOverPage();
 			executeGameStart();
 		}
@@ -129,6 +141,9 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Shows the score on the screen
 		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
+
+		// Shows the highscore on the screen
+		highScoreFont.draw(batch, "Best: " + String.valueOf(score), 200, 150);
 
 		// Finish putting things on the screen
 		batch.end();
@@ -150,6 +165,15 @@ public class RunningDude extends ApplicationAdapter {
 		int xCoord = (gameWidth / 2) - (gameOver.getWidth() / 2);
 		int yCoord = (gameHeight / 2) - (gameOver.getHeight() / 2);
 		batch.draw(gameOver, xCoord, yCoord);
+	}
+
+	private void saveHighScore(int score) {
+		int current = pref.getInteger("highscore", 0);
+
+		if (score > current) {
+			pref.putInteger("highscore", score);
+			pref.flush();
+		}
 	}
 
 	private void executeGameStart() {
