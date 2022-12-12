@@ -143,7 +143,7 @@ public class RunningDude extends ApplicationAdapter {
 		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
 
 		// Shows the highscore on the screen
-		highScoreFont.draw(batch, "Best: " + String.valueOf(score), 200, 150);
+		highScoreFont.draw(batch, "Best: " + pref.getInteger("highscore", 0), 100, 150);
 
 		// Finish putting things on the screen
 		batch.end();
