@@ -35,4 +35,10 @@ public abstract class Utilities {
 
     // Gameover
     public static final int DEFAULT_COUNTDOWN = 65;
+
+    // Health System
+    public static final int HEALTH_FULL = 0;
+    public static final int HEALTH_ACCEPTABLE = 1;
+    public static final int HEALTH_DANGER = 2;
+
 }

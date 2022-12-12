@@ -71,6 +71,10 @@ public class RunningDude extends ApplicationAdapter {
 	GameMode gMode;
 	int gameMode = Utilities.NORMAL_MODE;
 
+	// Health State
+	Health health;
+	int healthState = Utilities.HEALTH_FULL;
+
 	// Called when the app is opened for the first time
 	@Override
 	public void create () {
@@ -108,13 +112,16 @@ public class RunningDude extends ApplicationAdapter {
 		gMode = new GameMode();
 
 		// Set up game over
-		gameOver = new Texture("game-over.png");
+		gameOver = new Texture(GameMode.GAMEOVER_FILE);
 
 		// HighScore
 		pref = Gdx.app.getPreferences(Utilities.HIGHSCORE_TAGs[gameMode]);
 		highScoreFont = new BitmapFont();
 		highScoreFont.setColor(Color.WHITE);
 		highScoreFont.getData().setScale(8);
+
+		// Health
+		health = new Health();
 	}
 
 	// Runs over and over again until the app is done
@@ -145,6 +152,8 @@ public class RunningDude extends ApplicationAdapter {
 		if (gameState == Utilities.GAME_LIVE_STATE) {
 			executeGameLive();
 		}
+
+
 
 		if (gameState == Utilities.GAME_OVER_STATE) {
 			Texture dizzyDude = gameCharacter.getDizzyState();
@@ -225,12 +234,15 @@ public class RunningDude extends ApplicationAdapter {
 			toxinParameters.clear();
 			toxinCount = Utilities.DEFAULT_TOXIN_COUNT;
 			countdown = Utilities.DEFAULT_COUNTDOWN;
+			healthState = Utilities.HEALTH_FULL;
 		}
 	}
 
 	private void executeGameLive() {
 		printToxinsToScreen();
 		printDiamondsToScreen();
+
+		health.showHealthBar(batch, healthState, gameWidth, gameHeight);
 
 		// Set game character based on his state of the game
 		Texture[] dudesArray = gameCharacter.getStatesArray();
@@ -256,6 +268,7 @@ public class RunningDude extends ApplicationAdapter {
 
 		showScore();
 	}
+
 
 	private void updateCharacterState() {
 		// Updates Character state every few iterations of render() function execution
@@ -333,7 +346,24 @@ public class RunningDude extends ApplicationAdapter {
 		for (int i = 0; i < toxinParameters.size(); i++) {
 			Rectangle toxinHitBox = toxinParameters.get(i);
 			if (toxin.isHitBoxInRange(dudeRectangle, toxinHitBox)) {
-				gameState = Utilities.GAME_OVER_STATE;
+				if (healthState == Utilities.HEALTH_FULL) {
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight);
+					toxinParameters.remove(i);
+					toxinXCoords.remove(i);
+					toxinYCoords.remove(i);
+					break;
+				}
+
+				else if (healthState == Utilities.HEALTH_ACCEPTABLE) {
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight);
+					toxinParameters.remove(i);
+					toxinXCoords.remove(i);
+					toxinYCoords.remove(i);
+					break;
+				}
+				else {
+					gameState = Utilities.GAME_OVER_STATE;
+				}
 			}
 		}
 	}

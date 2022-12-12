@@ -10,6 +10,7 @@ public class GameMode {
     private static final String NORMAL_FILE = "normal.png";
     private static final String HARD_FILE = "hard.png";
     private static final String KILLER_FILE = "killer.png";
+    public static final String GAMEOVER_FILE = "game-over.png";
 
     Texture easyBox;
     Rectangle easyRec;
