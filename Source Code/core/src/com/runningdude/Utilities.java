@@ -25,6 +25,7 @@ public abstract class Utilities {
 
     // Involves with scoreboard
     public static final int DEFAULT_SCORE = 0;
+    public static final String[] HIGHSCORE_TAGs = {"highscore-easy", "highscore-normal", "highscore-hard"};
 
     // Modes
     public static final int EASY_MODE = 0;

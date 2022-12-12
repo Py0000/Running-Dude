@@ -56,9 +56,6 @@ public class RunningDude extends ApplicationAdapter {
 	int score = 0;
 	BitmapFont scoreFont;
 
-	// Waiting Page
-	Texture waitingPage;
-
 	// Game Over State
 	Texture gameOver;
 
@@ -101,10 +98,10 @@ public class RunningDude extends ApplicationAdapter {
 		gameCharacter = new GameCharacter();
 
 		// Set up the diamond
-		diamond = new GameAccessory("diamond.png");
+		diamond = new GameAccessory(GameAccessory.DIAMOND_FILE);
 
 		// Set up the toxin
-		toxin = new GameAccessory("toxin.png");
+		toxin = new GameAccessory(GameAccessory.TOXIN_FILE);
 
 		// Set up the scoreboard
 		scoreFont = new BitmapFont();
@@ -112,7 +109,6 @@ public class RunningDude extends ApplicationAdapter {
 		scoreFont.getData().setScale(8);
 
 		// Set up the waiting page
-		waitingPage = new Texture("start.png");
 		easyBox = new Texture("easy.png");
 		normalBox = new Texture("normal.png");
 		hardBox = new Texture("hard.png");
@@ -121,7 +117,7 @@ public class RunningDude extends ApplicationAdapter {
 		gameOver = new Texture("game-over.png");
 
 		// HighScore
-		pref = Gdx.app.getPreferences("highscore");
+		pref = Gdx.app.getPreferences(Utilities.HIGHSCORE_TAGs[gameMode]);
 		highScoreFont = new BitmapFont();
 		highScoreFont.setColor(Color.WHITE);
 		highScoreFont.getData().setScale(8);
@@ -185,7 +181,7 @@ public class RunningDude extends ApplicationAdapter {
 		scoreFont.draw(batch, String.valueOf(score), gameWidth - 200, 150);
 
 		// Shows the highscore on the screen
-		highScoreFont.draw(batch, "Best: " + pref.getInteger("highscore", 0), 100, 150);
+		highScoreFont.draw(batch, "Best: " + pref.getInteger(Utilities.HIGHSCORE_TAGs[gameMode], 0), 100, 150);
 	}
 
 	private void proceedToStartGame() {
@@ -210,7 +206,6 @@ public class RunningDude extends ApplicationAdapter {
 
 			executeGameStart();
 		}
-
 	}
 
 	private void setUpWaitingPage() {
@@ -239,10 +234,10 @@ public class RunningDude extends ApplicationAdapter {
 	}
 
 	private void saveHighScore(int score) {
-		int current = pref.getInteger("highscore", 0);
+		int current = pref.getInteger(Utilities.HIGHSCORE_TAGs[gameMode], 0);
 
 		if (score > current) {
-			pref.putInteger("highscore", score);
+			pref.putInteger(Utilities.HIGHSCORE_TAGs[gameMode], score);
 			pref.flush();
 		}
 	}

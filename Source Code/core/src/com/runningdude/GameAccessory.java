@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Random;
 
 public class GameAccessory {
+    public static final String DIAMOND_FILE = "diamond.png";
+    public static final String TOXIN_FILE = "toxin.png";
+
     private Texture accessory;
 
     public GameAccessory(String fileName) {
