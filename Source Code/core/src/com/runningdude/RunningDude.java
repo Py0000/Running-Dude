@@ -14,7 +14,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class RunningDude extends ApplicationAdapter {
 	// Fields required to setup the application
@@ -51,6 +50,13 @@ public class RunningDude extends ApplicationAdapter {
 	ArrayList<Integer> toxinYCoords = new ArrayList<>();
 	ArrayList<Rectangle> toxinParameters = new ArrayList<>(); //Holds teh parameter of the toxin
 	int toxinCount;
+
+	// Fields related to first add accessory
+	GameAccessory aid;
+	ArrayList<Integer> aidXCoords = new ArrayList<>();
+	ArrayList<Integer> aidYCoords = new ArrayList<>();
+	ArrayList<Rectangle> aidParameters = new ArrayList<>(); //Holds teh parameter of the toxin
+	int aidCount;
 
 	// Handles the score
 	int score = 0;
@@ -102,6 +108,9 @@ public class RunningDude extends ApplicationAdapter {
 
 		// Set up the toxin
 		toxin = new GameAccessory(GameAccessory.TOXIN_FILE);
+
+		// Set up the aid
+		aid = new GameAccessory(GameAccessory.FIRST_AID_FILE);
 
 		// Set up the scoreboard
 		scoreFont = new BitmapFont();
@@ -172,6 +181,7 @@ public class RunningDude extends ApplicationAdapter {
 
 		calculateScore();
 		detectGameOver();
+		detectAidReceive();
 
 		// Finish putting things on the screen
 		batch.end();
@@ -235,12 +245,17 @@ public class RunningDude extends ApplicationAdapter {
 			toxinCount = Utilities.DEFAULT_TOXIN_COUNT;
 			countdown = Utilities.DEFAULT_COUNTDOWN;
 			healthState = Utilities.HEALTH_FULL;
+			aidXCoords.clear();
+			aidYCoords.clear();
+			aidParameters.clear();
+			aidCount = Utilities.DEFAULT_AID_COUNT;
 		}
 	}
 
 	private void executeGameLive() {
 		printToxinsToScreen();
 		printDiamondsToScreen();
+		printAidsToScreen();
 
 		health.showHealthBar(batch, healthState, gameWidth, gameHeight);
 
@@ -301,7 +316,7 @@ public class RunningDude extends ApplicationAdapter {
 	}
 
 	private void printToxinsToScreen() {
-		// Put a toxin after every 250 iterations of render() function execution
+		// Put a toxin after every few iterations of render() function execution
 		toxinCount = toxin.putAccessoryAndUpdateCount(toxinXCoords, toxinYCoords, gameWidth, gameHeight, toxinCount, Utilities.TOXIN_FREQUENCIES[gameMode]);
 
 		// Clear everything in toxin rectangle
@@ -314,7 +329,7 @@ public class RunningDude extends ApplicationAdapter {
 	}
 
 	private void printDiamondsToScreen() {
-		// Put a diamond after every 100 iterations of render() function execution
+		// Put a diamond after every few iterations of render() function execution
 		diamondCount = diamond.putAccessoryAndUpdateCount(diamondXCoords, diamondYCoords, gameWidth, gameHeight, diamondCount, Utilities.DIAMOND_FREQUENCIES[gameMode]);
 
 		// Clear everything in diamond rectangle
@@ -323,6 +338,19 @@ public class RunningDude extends ApplicationAdapter {
 		// Draw the diamonds on the screen
 		for (int i = 0; i < diamondXCoords.size(); i++) {
 			diamond.setUpAccessory(batch, diamondXCoords, diamondYCoords, diamondParameters, i, Utilities.DIAMOND_FACTORS[gameMode]);
+		}
+	}
+
+	private void printAidsToScreen() {
+		// Put an aid after every few iterations of render() function execution
+		aidCount = aid.putAccessoryAndUpdateCount(aidXCoords, aidYCoords, gameWidth, gameHeight, aidCount, Utilities.AID_FREQUENCIES[gameMode]);
+
+		// Clear everything in diamond rectangle
+		aidParameters.clear();
+
+		// Draw the diamonds on the screen
+		for (int i = 0; i < aidXCoords.size(); i++) {
+			aid.setUpAccessory(batch, aidXCoords, aidYCoords, aidParameters, i, Utilities.AID_FACTORS[gameMode]);
 		}
 	}
 
@@ -347,7 +375,7 @@ public class RunningDude extends ApplicationAdapter {
 			Rectangle toxinHitBox = toxinParameters.get(i);
 			if (toxin.isHitBoxInRange(dudeRectangle, toxinHitBox)) {
 				if (healthState == Utilities.HEALTH_FULL) {
-					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight);
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight, Utilities.DAMAGE_MODE);
 					toxinParameters.remove(i);
 					toxinXCoords.remove(i);
 					toxinYCoords.remove(i);
@@ -355,14 +383,47 @@ public class RunningDude extends ApplicationAdapter {
 				}
 
 				else if (healthState == Utilities.HEALTH_ACCEPTABLE) {
-					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight);
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight, Utilities.DAMAGE_MODE);
 					toxinParameters.remove(i);
 					toxinXCoords.remove(i);
 					toxinYCoords.remove(i);
 					break;
 				}
+
 				else {
 					gameState = Utilities.GAME_OVER_STATE;
+				}
+			}
+		}
+	}
+
+	private void detectAidReceive() {
+		// Check if game character hits a first aid box
+		for (int i = 0; i < aidParameters.size(); i++) {
+			Rectangle aidHitBox = aidParameters.get(i);
+			if (aid.isHitBoxInRange(dudeRectangle, aidHitBox)) {
+				if (healthState == Utilities.HEALTH_FULL) {
+					score += Utilities.BONUS_SCORE;
+					aidParameters.remove(i);
+					aidXCoords.remove(i);
+					aidYCoords.remove(i);
+					break;
+				}
+
+				else if (healthState == Utilities.HEALTH_ACCEPTABLE) {
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight, Utilities.BLESSING_MODE);
+					aidParameters.remove(i);
+					aidXCoords.remove(i);
+					aidYCoords.remove(i);
+					break;
+				}
+
+				else {
+					healthState = health.updateHealth(healthState, batch, gameWidth, gameHeight, Utilities.BLESSING_MODE);
+					aidParameters.remove(i);
+					aidXCoords.remove(i);
+					aidYCoords.remove(i);
+					break;
 				}
 			}
 		}

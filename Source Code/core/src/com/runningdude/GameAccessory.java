@@ -11,6 +11,7 @@ import java.util.Random;
 public class GameAccessory {
     public static final String DIAMOND_FILE = "diamond.png";
     public static final String TOXIN_FILE = "toxin.png";
+    public static final String FIRST_AID_FILE = "first-aid.png";
 
     private Texture accessory;
 
